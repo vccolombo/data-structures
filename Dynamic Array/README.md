@@ -2,7 +2,7 @@
 
 ## Languages
 
-- [ ] Java
+- [x] Java
 - [ ] C
 
 ## Operations
@@ -22,12 +22,6 @@
 - resize(new_capacity) // private function
   - when you reach capacity, resize to double the size
   - when popping an item, if size is 1/4 of capacity, resize to half
-
-## Implementation Details
-
-- all public methods must have unit tests
-- `clear()` does not overwrite data, just change the 'visible size' of the vector
-- `clear()` does not resize the array
 
 ### Time
 
