@@ -11,10 +11,10 @@ int *twoSum(int *nums, int numsSize, int target, int *returnSize)
 {
     int i;
     int *result = malloc(2 * sizeof(int));
-    struct HashTable *ht = malloc(sizeof(struct HashTable));
+    struct HashTable *ht;
     *returnSize = 2;
 
-    HashTableInit(ht, numsSize * EXTRA_ESPACE);
+    ht = HashTableAlloc(numsSize * EXTRA_ESPACE);
 
     for (i = 0; i < numsSize; i++)
     {
@@ -28,9 +28,8 @@ int *twoSum(int *nums, int numsSize, int target, int *returnSize)
         HashTableInsert(ht, target - looking, i);
     }
 
-    free(ht);
-
 out:
+    HashTableFree(ht);
     return result;
 }
 
@@ -54,5 +53,9 @@ int main()
     int returnsize[] = {0};
     int *result = twoSum(nums, n, nums[expected1] + nums[expected2], returnsize);
     printf("Found %d %d\nExpected %d %d\n", result[0], result[1], expected1, expected2);
+
+    free(result);
+    free(nums);
+
     return 0;
 }

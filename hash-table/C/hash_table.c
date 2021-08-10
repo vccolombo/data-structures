@@ -12,32 +12,20 @@ struct HashTableEntry
     int value;
 };
 
-static inline void *zalloc(uint32_t size)
+struct HashTable
+{
+    struct HashTableEntry **table;
+    uint32_t size;
+};
+
+static inline void *_zalloc(uint32_t size)
 {
     void *m = malloc(size * sizeof(struct HashTableEntry *));
     memset(m, 0, size * sizeof(struct HashTableEntry *));
     return m;
 }
 
-void HashTableInit(struct HashTable *ht, uint32_t size)
-{
-    ht->table = zalloc(size * sizeof(struct HashTableEntry *));
-    memset(ht->table, 0, size * sizeof(struct HashTableEntry *));
-    ht->size = size;
-}
-
-void HashTableFree(struct HashTable *ht)
-{
-    uint32_t i, size = ht->size;
-    for (i = 0; i < size; i++)
-    {
-        if (ht->table[i])
-            free(ht->table[i]);
-    }
-    free(ht->table);
-}
-
-uint32_t hashFunction(int key)
+uint32_t _hashFunction(int key)
 {
     uint32_t i, h = 7;
 
@@ -50,15 +38,52 @@ uint32_t hashFunction(int key)
     return h;
 }
 
-int HashTableCheckIndex(struct HashTable *ht, uint32_t index, int key)
+int _checkAtIndex(struct HashTable *ht, uint32_t index, int key)
 {
     return ht->table[index] && ht->table[index]->key != key;
 }
 
+void _allocTable(struct HashTable *ht, uint32_t size)
+{
+    ht->table = _zalloc(size * sizeof(struct HashTableEntry *));
+    ht->size = size;
+}
+
+void _freeTableEntries(struct HashTable *ht)
+{
+    uint32_t i, size = ht->size;
+    for (i = 0; i < size; i++)
+    {
+        if (ht->table[i])
+            free(ht->table[i]);
+    }
+}
+struct HashTable *HashTableAlloc(uint32_t size)
+{
+    struct HashTable *ht;
+
+    ht = malloc(sizeof(struct HashTable));
+    if (ht)
+        _allocTable(ht, size);
+
+    return ht;
+}
+
+// Expects that ht is valid
+void HashTableFree(struct HashTable *ht)
+{
+    if (ht->table)
+    {
+        _freeTableEntries(ht);
+        free(ht->table);
+    }
+    free(ht);
+}
+
 void HashTableInsert(struct HashTable *ht, int key, int value)
 {
-    uint32_t index = hashFunction(key) % ht->size;
-    while (HashTableCheckIndex(ht, index, key))
+    uint32_t index = _hashFunction(key) % ht->size;
+    while (_checkAtIndex(ht, index, key))
     {
         index = (index + 1) % ht->size;
     }
@@ -72,8 +97,8 @@ void HashTableInsert(struct HashTable *ht, int key, int value)
 
 int HashTableGet(struct HashTable *ht, int key)
 {
-    uint32_t index = hashFunction(key) % ht->size;
-    while (HashTableCheckIndex(ht, index, key))
+    uint32_t index = _hashFunction(key) % ht->size;
+    while (_checkAtIndex(ht, index, key))
         index = (index + 1) % ht->size;
 
     if (!ht->table[index])
@@ -86,8 +111,8 @@ int HashTableGet(struct HashTable *ht, int key)
 
 int HashTableContains(struct HashTable *ht, int key)
 {
-    uint32_t index = hashFunction(key) % ht->size;
-    while (HashTableCheckIndex(ht, index, key))
+    uint32_t index = _hashFunction(key) % ht->size;
+    while (_checkAtIndex(ht, index, key))
         index = (index + 1) % ht->size;
 
     return ht->table[index] && ht->table[index]->key == key;

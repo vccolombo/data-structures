@@ -5,13 +5,9 @@
 
 struct HashTableEntry;
 
-struct HashTable
-{
-    struct HashTableEntry **table;
-    uint32_t size;
-};
+struct HashTable;
 
-void HashTableInit(struct HashTable *ht, uint32_t size);
+struct HashTable *HashTableAlloc(uint32_t size);
 
 void HashTableFree(struct HashTable *ht);
 
